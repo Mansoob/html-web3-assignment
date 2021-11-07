@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>
+            IE Tracker
+        </title>
+        <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    </head>
+
+    <body>
+        <h2>Income and Expense Tracker App</h2>
+        <h2>by SMH</h2>
+        
+        <h2 id="info"></h2><br>
+
+		<div>
+			<h2>Balance</h2>
+			<h2 id="balance"></h2>
+			<button onclick="getBalance()">Update Balances</button>
+		</div>
+			
+		<div>
+			<h2>Total Income</h2>
+			<h2 id="income"></h2>
+			<button onclick="getIncome()">Udate Income</button>
+		</div>
+
+		<div>
+			<h2>Total Expense</h2>
+			<h2 id="expense"></h2>
+			<button onclick="getExpense()">Udate Income</button>
+		</div>
+
+		<div>
+			<h2>Add Transaction</h2>
+			<label for="description">Description</label>
+			<input type="text" id="desc">
+			<br>
+			<label for="amount">Amount</label>
+			<input type="number" id="num">
+			<br>
+			<button onclick="addTrx();">Submit</button>
+		</div>
+
+		<div>
+			<h2>Transaction History</h2>
+			<h2 id="his"></h2>
+			<button onclick="showTrxHis();"></button>
+		</div>
+        
+
+        <script type="text/javascript">
+            
+			// set Account, Contract Address and ABI
+			const account = '0xE56DbD2308c0EBa8903fCCFA04AC03DaaffAdDa7';
+			const contractAddress = '0x542e50919d00250350170160a76f1c8bdecc0e5b';
+			const abi = [
+				{
+					"anonymous": false,
+					"inputs": [
+						{
+							"indexed": false,
+							"internalType": "uint256",
+							"name": "id",
+							"type": "uint256"
+						},
+						{
+							"indexed": false,
+							"internalType": "string",
+							"name": "",
+							"type": "string"
+						},
+						{
+							"indexed": false,
+							"internalType": "string",
+							"name": "description",
+							"type": "string"
+						},
+						{
+							"indexed": false,
+							"internalType": "int256",
+							"name": "amount",
+							"type": "int256"
+						}
+					],
+					"name": "transaction",
+					"type": "event"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "string",
+							"name": "_description",
+							"type": "string"
+						},
+						{
+							"internalType": "int256",
+							"name": "_amount",
+							"type": "int256"
+						}
+					],
+					"name": "addTransaction",
+					"outputs": [],
+					"stateMutability": "nonpayable",
+					"type": "function"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "uint256",
+							"name": "",
+							"type": "uint256"
+						}
+					],
+					"name": "data",
+					"outputs": [
+						{
+							"internalType": "uint256",
+							"name": "id",
+							"type": "uint256"
+						},
+						{
+							"internalType": "string",
+							"name": "description",
+							"type": "string"
+						},
+						{
+							"internalType": "int256",
+							"name": "amount",
+							"type": "int256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [],
+					"name": "getBalance",
+					"outputs": [
+						{
+							"internalType": "int256",
+							"name": "",
+							"type": "int256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [],
+					"name": "getTotalExpense",
+					"outputs": [
+						{
+							"internalType": "int256",
+							"name": "",
+							"type": "int256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [],
+					"name": "getTotalIncome",
+					"outputs": [
+						{
+							"internalType": "int256",
+							"name": "",
+							"type": "int256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [],
+					"name": "getTotalTrx",
+					"outputs": [
+						{
+							"internalType": "uint256",
+							"name": "",
+							"type": "uint256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "uint256",
+							"name": "_id",
+							"type": "uint256"
+						}
+					],
+					"name": "getTrxDetails",
+					"outputs": [
+						{
+							"internalType": "uint256",
+							"name": "getId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "string",
+							"name": "getDescription",
+							"type": "string"
+						},
+						{
+							"internalType": "int256",
+							"name": "getAmount",
+							"type": "int256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [],
+					"name": "updateBalance",
+					"outputs": [
+						{
+							"internalType": "int256",
+							"name": "",
+							"type": "int256"
+						},
+						{
+							"internalType": "int256",
+							"name": "",
+							"type": "int256"
+						},
+						{
+							"internalType": "int256",
+							"name": "",
+							"type": "int256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				}
+			];
+
+			let bal = document.getElementById('getBalance');
+			let inc = document.getElementById('getTotalIncome');
+			let exp = document.getElementById('getTotalExpense');
+			let his = document.getElementById('getTrxDetails');
+
+			async function loadWeb3(){
+            if(window.ethereum){
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+				}
+			}
+			async function loadContract(){
+				return await new window.web3.eth.Contract(abi, contractAddress);
+			}
+			async function getBalance() {
+				let a = await window.contract.methods.getBalance().call();
+				bal.innerHTML = a;
+			}
+			async function getIncome() {
+				let a = await window.contract.methods.getTotalIncome().call();
+				inc.innerHTML = a;
+			}
+			async function getExpense() {
+				let a = await window.contract.methods.getTotalExpense().call();
+				exp.innerHTML = a;
+			}
+
+			//Add trasactopm
+			async function addTrx() {
+				await window.contract.methods.addIncome(document.getElementById('two').value, document.getElementById('one').value).send( {from: '0xA446638Aa93E08B9f68393e812919906F38A63fb'})
+			}
+
+			//Show transaction list
+			async function showTrxHis() {
+				let a = await window.contract.methods.getTotalTrx().call();
+				for(let i = 0; i < a; i++) {
+				history = await window.contract.methods.getTrxDetails(i).call();
+				his.innerHTML += "<h3>"+" Tranasaction ID: " + history[0] + ", Description: "+history[1]+", Tranasaction amount: "+ history[2] + "<h3> "+ "<br />" ;
+				}
+			}
+
+			async function load() {
+				await loadWeb3();
+				window.contract = await loadContract();
+			}
+			
+			load();
+        </script>
+    </body>
+
+</html>
